@@ -6,9 +6,45 @@
 #include <string>
 #include <optional>
 #include <ostream>
-#include <unordered_map>
+
+
+using namespace std;
+
 
 enum class BucketType { NORMAL, ESS, EAR };
+class HashTableBucket {
+public:
+    /**
+    * The default constructor can simply set the bucket type to ESS.
+     *
+    */
+    HashTableBucket();
+
+    /**
+    * A parameterized constructor could initialize the key and value, as
+    * well as set the bucket type to NORMAL.
+    */
+    HashTableBucket(string key, int value);
+
+    /**
+    * A load method could load the key-value pair into the bucket, which
+    * should then also mark the bucket as NORMAL.
+    */
+    void load(string key, int value);
+
+    /**
+    * This method would return whether the bucket is empty, regardless of
+    * if it has had data placed in it or not.
+    */
+    bool isEmpty() const;
+
+    /**
+    * The stream insertion operator could be overloaded to print the
+    * bucket's contents. Or if preferred, you could write a print method
+    * instead.
+    */
+    friend std::ostream &operator<<(std::ostream &os, const HashTableBucket &bucket);
+};
 
 class HashTable {
 public:
@@ -114,43 +150,11 @@ public:
  Bucket
 * 11: <Hugo, 42108>
 */
-    friend std::ostream &operator<<(std::ostream &os, const HashTable &hashTable);
+    friend ostream &operator<<(ostream &os, const HashTable &hashTable);
 
 private:
     std::vector<HashTableBucket> tableData;
 };
 
+#endif
 
-class HashTableBucket {
-public:
-    /**
-    * The default constructor can simply set the bucket type to ESS.
-     *
-    */
-    HashTableBucket();
-
-    /**
-    * A parameterized constructor could initialize the key and value, as
-    * well as set the bucket type to NORMAL.
-    */
-    HashTableBucket(string key, int value);
-
-    /**
-    * A load method could load the key-value pair into the bucket, which
-    * should then also mark the bucket as NORMAL.
-    */
-    void load(string key, int value);
-
-    /**
-    * This method would return whether the bucket is empty, regardless of
-    * if it has had data placed in it or not.
-    */
-    bool isEmpty() const;
-
-    /**
-    * The stream insertion operator could be overloaded to print the
-    * bucket's contents. Or if preferred, you could write a print method
-    * instead.
-    */
-    friend std::ostream &operator<<(std::ostream &os, const HashTableBucket &bucket);
-};
