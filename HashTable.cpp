@@ -212,6 +212,37 @@ bool HashTable::contains(const string &key) const {
 * exception if the key is not found.
 */
 optional<int> HashTable::get(const string &key) const {
+    size_t home = hash<string>{}(key) % capacity();
+
+    unsigned seed = key.length();
+    vector<size_t> probeOffsets;
+    for (size_t i = 1; i < capacity(); ++i) {
+        probeOffsets.push_back(i);
+    }
+    default_random_engine rng(seed);
+    shuffle(probeOffsets.begin(), probeOffsets.end(), rng);
+
+    for (size_t i = 0; i <= probeOffsets.size(); ++i) {
+        size_t index;
+        if (i == 0) {
+            index = home;
+        } else {
+            index = (home + probeOffsets[i - 1]) % capacity();
+        }
+
+        const HashTableBucket &bucket = tableData[index];
+
+        if (bucket.type == BucketType::ESS) {
+            return nullopt;
+        } else {
+            if (bucket.type == BucketType::NORMAL) {
+                if (bucket.key == key) {
+                    return bucket.value;
+                }
+            }
+        }
+    }
+    return nullopt;
 }
 
 /**
