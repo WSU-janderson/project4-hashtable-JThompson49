@@ -122,6 +122,44 @@ bool HashTable::insert(string key, size_t value) {
 * table. This might just be marking a bucket as empty-after-remove
 */
 bool HashTable::remove(string key) {
+    size_t home = hash<string>{}(key) % capacity();
+
+    unsigned seed = key.length();
+    vector<size_t> probeOffsets;
+    for (size_t i = 1; i < capacity(); ++i) {
+        probeOffsets.push_back(i);
+    }
+    default_random_engine rng(seed);
+    shuffle(probeOffsets.begin(), probeOffsets.end(), rng);
+
+    for (size_t i = 0; i <= probeOffsets.size(); ++i) {
+        size_t index;
+        if (i == 0) {
+            index = home;
+        } else {
+            index = (home + probeOffsets[i - 1]) % capacity();
+        }
+
+        HashTableBucket &bucket = tableData[index];
+
+        if (bucket.type == BucketType::ESS) {
+            return false;
+        } else {
+            if (bucket.type == BucketType::NORMAL) {
+                if (bucket.key == key) {
+                    bucket.key = "THIS_IS_EMPTY";
+                    bucket.value = 0;
+                    bucket.type = BucketType::EAR;
+                    if (currentSize > 0) {
+                        --currentSize;
+                    }
+                    ++deletedCount;
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
 }
 
 /**
