@@ -6,14 +6,18 @@
  *
 */
 HashTableBucket::HashTableBucket() {
-
+    key = "THIS_IS_EMPTY";
+    value = 0;
+    type = BucketType::ESS;
 }
 /**
 * A parameterized constructor could initialize the key and value, as
 * well as set the bucket type to NORMAL.
 */
 HashTableBucket::HashTableBucket(string key, int value) {
-
+    this->key = key;
+    this->value = value;
+    this->type = BucketType::NORMAL;
 }
 
 /**
@@ -21,14 +25,21 @@ HashTableBucket::HashTableBucket(string key, int value) {
 * should then also mark the bucket as NORMAL.
 */
 void HashTableBucket::load(string key, int value) {
-
+    this->key = key;
+    this->value = value;
+    this->type = BucketType::NORMAL;
 }
 /**
 * This method would return whether the bucket is empty, regardless of
 * if it has had data placed in it or not.
 */
 bool HashTableBucket::isEmpty() const {
-
+    if (type != BucketType::NORMAL) {
+     return true;
+    }
+    else {
+     return false;
+    }
 }
 /**
 * The stream insertion operator could be overloaded to print the
@@ -45,7 +56,11 @@ ostream& operator<<(ostream& os, const HashTableBucket& bucket);
 * necessary. If no capacity is given, it defaults to 8 initially
 */
 HashTable::HashTable(size_t initCapacity) {
+    tableData.resize(initCapacity);
 
+    currentSize = 0;
+    deletedCount = 0;
+    generateOffsets(initCapacity, 0);
 }
 
 /**
@@ -119,22 +134,22 @@ std::vector<string> HashTable::keys() const {
 * this method must be O(1).
 */
 double HashTable::alpha() const {
-
+    return static_cast<double>(currentSize) / static_cast<double>(capacity());
 }
 /**
 * capacity returns how many buckets in total are in the hash table. The time
 * complexity for this algorithm must be O(1).
 */
 size_t HashTable::capacity() const {
-
+    return tableData.size();
 }
 /**
 * The size method returns how many key-value pairs are in the hash table. The
 * time complexity for this method must be O(1)
 */
 size_t HashTable::size() const {
-
-
+    return currentSize;
+}
  /**
 * operator<< is another example of operator overloading in C++, similar to
 * operator[]. The friend keyword only needs to appear in the class declaration,
@@ -154,5 +169,16 @@ size_t HashTable::size() const {
  Bucket
 * 11: <Hugo, 42108>
 */
- ostream& operator<<(ostream& os, const HashTable& hashTable);
+ ostream& operator<<(ostream& os, const HashTable& hashTable){
+    for (size_t i = 0; i < hashTable.tableData.size(); ++i) {
+        const HashTableBucket& bucket = hashTable.tableData[i];
+        if (!bucket.isEmpty()) {
+            os << "Bucket " << i << ": <" << bucket.key << ", " << bucket.value << ">\n";
+        }
+    }
+    return os;
+}
+
+void HashTable::generateOffsets(size_t cap, unsigned seed) {
+
 }

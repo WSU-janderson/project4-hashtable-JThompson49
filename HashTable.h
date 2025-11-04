@@ -14,6 +14,9 @@ using namespace std;
 enum class BucketType { NORMAL, ESS, EAR };
 class HashTableBucket {
 public:
+    string key;
+    size_t value;
+    BucketType type;
     /**
     * The default constructor can simply set the bucket type to ESS.
      *
@@ -48,6 +51,9 @@ public:
 
 class HashTable {
 public:
+    size_t currentSize;
+    size_t deletedCount;
+    std::vector<size_t> offsets;
     /**
     *Only a single constructor that takes an initial capacity for the table is
     * necessary. If no capacity is given, it defaults to 8 initially
@@ -83,7 +89,7 @@ public:
     * signify the return value is invalid. It's also much better than throwing an
     * exception if the key is not found.
     */
-    std::optional<int> get(const string &key) const;
+    optional<int> get(const string &key) const;
 
     /**
     * The bracket operator lets us access values in the map using a familiar syntax,
@@ -106,7 +112,7 @@ public:
     * with all of the keys currently in the table. The length of the vector should be
     * the same as the size of the hash table.
     */
-    std::vector<string> keys() const;
+    vector<string> keys() const;
 
     /**
     * alpha returns the current load factor of the table, or size/capacity. Since
@@ -151,6 +157,9 @@ public:
 * 11: <Hugo, 42108>
 */
     friend ostream &operator<<(ostream &os, const HashTable &hashTable);
+
+    void generateOffsets(size_t cap, unsigned seed);
+
 
 private:
     std::vector<HashTableBucket> tableData;
