@@ -6,6 +6,8 @@
 #include <string>
 #include <optional>
 #include <ostream>
+#include <random>
+#include <algorithm>
 
 
 using namespace std;
@@ -159,6 +161,8 @@ public:
     friend ostream &operator<<(ostream &os, const HashTable &hashTable);
 
     void generateOffsets(size_t cap, unsigned seed);
+
+    size_t hashIndex(const string &key) const;
 
 
 private:

@@ -10,6 +10,7 @@ HashTableBucket::HashTableBucket() {
     value = 0;
     type = BucketType::ESS;
 }
+
 /**
 * A parameterized constructor could initialize the key and value, as
 * well as set the bucket type to NORMAL.
@@ -29,26 +30,32 @@ void HashTableBucket::load(string key, int value) {
     this->value = value;
     this->type = BucketType::NORMAL;
 }
+
 /**
 * This method would return whether the bucket is empty, regardless of
 * if it has had data placed in it or not.
 */
 bool HashTableBucket::isEmpty() const {
     if (type != BucketType::NORMAL) {
-     return true;
-    }
-    else {
-     return false;
+        return true;
+    } else {
+        return false;
     }
 }
+
 /**
 * The stream insertion operator could be overloaded to print the
 * bucket's contents. Or if preferred, you could write a print method
 * instead.
 */
-ostream& operator<<(ostream& os, const HashTableBucket& bucket);
-
-
+ostream &operator<<(ostream &os, const HashTableBucket &bucket) {
+    if (bucket.isEmpty()) {
+        os << "<empty>";
+    } else {
+        os << "<" << bucket.key << ", " << bucket.value << ">";
+    }
+    return os;
+}
 
 
 /**
@@ -69,23 +76,94 @@ HashTable::HashTable(size_t initCapacity) {
 * unsucessful, such as when a duplicate is attempted to be inserted, the method
 * should return false
 */
-bool HashTable::insert(std::string key, size_t value) {
+bool HashTable::insert(string key, size_t value) {
+    if (contains(key)) {
+        return false;
+    }
 
+    srand(key.length());
+    generateOffsets(capacity(), key.length());
+
+    size_t home = hashIndex(key);
+    size_t firstEAR = capacity();
+
+    for (size_t i = 0; i <= offsets.size(); ++i) {
+        size_t index;
+        if (i == 0) {
+            index = home;
+        } else {
+            index = (home + offsets[i - 1]) % capacity();
+        }
+
+        HashTableBucket &bucket = tableData[index];
+
+        if (bucket.type == BucketType::ESS) {
+            bucket.load(key, value);
+            ++currentSize;
+            return true;
+        } else if (bucket.type == BucketType::EAR) {
+            if (firstEAR == capacity()) {
+                firstEAR = index;
+            }
+        }
+    }
+
+    if (firstEAR != capacity()) {
+        tableData[firstEAR].load(key, value);
+        ++currentSize;
+        --deletedCount;
+        return true;
+    }
+    return false;
 }
+
 /**
 * If the key is in the table, remove will “erase” the key-value pair from the
 * table. This might just be marking a bucket as empty-after-remove
 */
-bool HashTable::remove(std::string key) {
-
+bool HashTable::remove(string key) {
 }
+
 /**
 * contains returns true if the key is in the table and false if the key is not in
 * the table.
 */
-bool HashTable::contains(const string& key) const {
+bool HashTable::contains(const string &key) const {
+    size_t home = hash<string>{}(key) % capacity();
 
+    srand(key.length());
+    vector<size_t> probeOffsets;
+    for (size_t i = 1; i < capacity(); ++i) {
+        probeOffsets.push_back(i);
+    }
+    default_random_engine rng(key.length());
+    shuffle(probeOffsets.begin(), probeOffsets.end(), rng);
+
+    for (size_t i = 0; i <= probeOffsets.size(); ++i) {
+        size_t index;
+        if (i == 0) {
+            index = home;
+        }
+        else {
+            index = (home + probeOffsets[i - 1]) % capacity();
+        }
+
+        const HashTableBucket &bucket = tableData[index];
+
+        if (bucket.type == BucketType::ESS) {
+            return false;
+        }
+        else {
+            if (bucket.type == BucketType::NORMAL) {
+                if (bucket.key == key) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
 }
+
 /**
 * If the key is found in the table, find will return the value associated with
 * that key. If the key is not in the table, find will return something called
@@ -95,9 +173,9 @@ bool HashTable::contains(const string& key) const {
 * signify the return value is invalid. It's also much better than throwing an
 * exception if the key is not found.
 */
-std::optional<int> HashTable::get(const string& key) const {
-
+optional<int> HashTable::get(const string &key) const {
 }
+
 /**
 * The bracket operator lets us access values in the map using a familiar syntax,
 * similar to C++ std::map or Python dictionaries. It behaves like get, returnin
@@ -112,8 +190,7 @@ std::optional<int> HashTable::get(const string& key) const {
 * results in undefined behavior. Simply put, you do not need to address attempts
 * to access keys not in the table inside the bracket operator method.
 */
-int& HashTable::operator[](const string& key) {
-
+int &HashTable::operator[](const string &key) {
 }
 
 /**
@@ -121,9 +198,9 @@ int& HashTable::operator[](const string& key) {
 * with all of the keys currently in the table. The length of the vector should be
 * the same as the size of the hash table.
 */
-std::vector<string> HashTable::keys() const {
-
+vector<string> HashTable::keys() const {
 }
+
 /**
 * alpha returns the current load factor of the table, or size/capacity. Since
 * alpha returns a double,make sure to properly cast the size and capacity, which
@@ -136,6 +213,7 @@ std::vector<string> HashTable::keys() const {
 double HashTable::alpha() const {
     return static_cast<double>(currentSize) / static_cast<double>(capacity());
 }
+
 /**
 * capacity returns how many buckets in total are in the hash table. The time
 * complexity for this algorithm must be O(1).
@@ -143,6 +221,7 @@ double HashTable::alpha() const {
 size_t HashTable::capacity() const {
     return tableData.size();
 }
+
 /**
 * The size method returns how many key-value pairs are in the hash table. The
 * time complexity for this method must be O(1)
@@ -150,28 +229,29 @@ size_t HashTable::capacity() const {
 size_t HashTable::size() const {
     return currentSize;
 }
- /**
+
+/**
 * operator<< is another example of operator overloading in C++, similar to
 * operator[]. The friend keyword only needs to appear in the class declaration,
 * but not the definition. In addition, operator<< is not a method of HashTable,
 * so do not put HashTable:: before it when defining it. operator<< will allow us
 * to print the contents of our hash table using the normal syntax:
- cout <<
+cout <<
 * myHashTable << endl;
- You should only print the buckets which are occupied,
+You should only print the buckets which are occupied,
 * and along with each item you will print which bucket (the index of the bucket)
 * the item is in. To make it easy, I suggest creating a helper method called
 * something like printMe() that returns a string of everything in the table. An
 * example which uses open addressing for collision resolution could print
 * something like:
- Bucket 5: <James, 4815>
- Bucket 2: <Juliet, 1623>
- Bucket
+Bucket 5: <James, 4815>
+Bucket 2: <Juliet, 1623>
+Bucket
 * 11: <Hugo, 42108>
 */
- ostream& operator<<(ostream& os, const HashTable& hashTable){
+ostream &operator<<(ostream &os, const HashTable &hashTable) {
     for (size_t i = 0; i < hashTable.tableData.size(); ++i) {
-        const HashTableBucket& bucket = hashTable.tableData[i];
+        const HashTableBucket &bucket = hashTable.tableData[i];
         if (!bucket.isEmpty()) {
             os << "Bucket " << i << ": <" << bucket.key << ", " << bucket.value << ">\n";
         }
@@ -180,5 +260,18 @@ size_t HashTable::size() const {
 }
 
 void HashTable::generateOffsets(size_t cap, unsigned seed) {
-
+    offsets.clear();
+    if (cap < 2) {
+        return;
+    }
+    for (size_t i = 1; i < cap; ++i) {
+        offsets.push_back(i);
+    }
+    default_random_engine rng(seed);
+    shuffle(offsets.begin(), offsets.end(), rng);
 }
+
+size_t HashTable::hashIndex(const string &key) const {
+    return hash<string>{}(key) % capacity();
+}
+

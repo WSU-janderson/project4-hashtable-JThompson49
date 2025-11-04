@@ -8,9 +8,22 @@
 
 int main() {
     HashTable ht(8);
-    std::cout << "Capacity: " << ht.capacity() << "\n";
-    std::cout << "Size: " << ht.size() << "\n";
-    std::cout << "Alpha: " << ht.alpha() << "\n";
-    std::cout << ht << std::endl;
+    cout << "Capacity: " << ht.capacity() << endl;
+    cout << "Size: " << ht.size() << endl;
+    cout << "Alpha: " << ht.alpha() << endl;
+    cout << ht << endl;
 
+    cout << ht.insert("A", 1)<< endl;
+    cout << ht.insert("B", 2)<< endl;
+    cout << ht.insert("A", 3)<< endl;
+
+    cout << ht.contains("A")<< endl;
+    cout << ht.contains("B")<< endl;
+    cout << ht.contains("C")<< endl;
+
+    cout << ht<< endl;
+
+    cout << "Capacity: " << ht.capacity() << endl;
+    cout << "Size: " << ht.size() << endl;
+    cout << "Alpha: " << ht.alpha() << endl;
 }
