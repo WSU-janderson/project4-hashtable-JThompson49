@@ -53,6 +53,7 @@ public:
 
 class HashTable {
 public:
+    static constexpr size_t DEFAULT_INITIAL_CAPACITY = 8;
     size_t currentSize;
     size_t deletedCount;
     vector<size_t> offsets;
