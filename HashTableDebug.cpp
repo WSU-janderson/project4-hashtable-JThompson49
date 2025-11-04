@@ -60,4 +60,21 @@ int main() {
     cout << "Size: " << ht.size() << endl;
     cout << "Alpha: " << ht.alpha() << endl;
 
+
+    size_t startCap = ht.capacity();
+    cout << startCap << endl;
+    for (int i = 0; i < 10; ++i) {
+        std::string test = "test" + std::to_string(i);
+        ht.insert(test, i * 2);
+        startCap = ht.capacity();
+        cout << test << "    " << startCap << endl;
+    }
+
+    cout << ht<< endl;
+    startCap = ht.capacity();
+    cout << startCap << endl;
+    cout << "Capacity: " << ht.capacity() << endl;
+    cout << "Size: " << ht.size() << endl;
+    cout << "Alpha: " << ht.alpha() << endl;
+
 }

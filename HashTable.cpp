@@ -76,7 +76,23 @@ HashTable::HashTable(size_t initCapacity) {
 * unsucessful, such as when a duplicate is attempted to be inserted, the method
 * should return false
 */
-bool HashTable::insert(string key, size_t value) {
+bool HashTable::insert(std::string key, size_t value) {
+    if (contains(key)) {
+        return false;
+    }
+
+    double currentAlpha = alpha();
+    if (currentAlpha >= 0.5) {
+        size_t newCap = capacity() * 2;
+        if (newCap < 1) {
+            newCap = 1;
+        }
+        resize(newCap);
+    }
+    return insertAfter(key, value);
+}
+
+bool HashTable::insertAfter(string key, size_t value) {
     if (contains(key)) {
         return false;
     }
@@ -115,6 +131,25 @@ bool HashTable::insert(string key, size_t value) {
         return true;
     }
     return false;
+}
+
+void HashTable::resize(size_t newCap) {
+
+    vector<HashTableBucket> old = tableData;
+
+    tableData.clear();
+    tableData.resize(newCap);
+    currentSize = 0;
+    deletedCount = 0;
+    offsets.clear();
+    generateOffsets(newCap, 0);
+
+    for (size_t i = 0; i < old.size(); ++i) {
+        const HashTableBucket &b = old[i];
+        if (b.type == BucketType::NORMAL) {
+            insertAfter(b.key, b.value);
+        }
+    }
 }
 
 /**

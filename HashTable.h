@@ -48,14 +48,14 @@ public:
     * bucket's contents. Or if preferred, you could write a print method
     * instead.
     */
-    friend std::ostream &operator<<(std::ostream &os, const HashTableBucket &bucket);
+    friend ostream &operator<<(ostream &os, const HashTableBucket &bucket);
 };
 
 class HashTable {
 public:
     size_t currentSize;
     size_t deletedCount;
-    std::vector<size_t> offsets;
+    vector<size_t> offsets;
     /**
     *Only a single constructor that takes an initial capacity for the table is
     * necessary. If no capacity is given, it defaults to 8 initially
@@ -68,13 +68,13 @@ public:
     * unsucessful, such as when a duplicate is attempted to be inserted, the method
     * should return false
     */
-    bool insert(std::string key, size_t value);
+    bool insert(string key, size_t value);
 
     /**
     * If the key is in the table, remove will “erase” the key-value pair from the
     * table. This might just be marking a bucket as empty-after-remove
     */
-    bool remove(std::string key);
+    bool remove(string key);
 
     /**
     * contains returns true if the key is in the table and false if the key is not in
@@ -164,9 +164,12 @@ public:
 
     size_t hashIndex(const string &key) const;
 
+    bool insertAfter(string key, size_t value);
+
+    void resize(size_t newCap);
 
 private:
-    std::vector<HashTableBucket> tableData;
+    vector<HashTableBucket> tableData;
 };
 
 #endif
