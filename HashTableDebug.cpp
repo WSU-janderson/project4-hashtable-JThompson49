@@ -34,6 +34,16 @@ int main() {
     auto getTest2 = ht.get("D");
     cout << getTest2.value()<< endl;
 
+    cout << ht["A"]<< endl;
+    cout << ht["D"]<< endl;
+
+    auto keysTest = ht.keys();
+    for (auto &k : keysTest) {
+        cout << k << endl;
+    }
+
+    cout << &keysTest << endl;
+
     cout << ht.remove("A")<< endl;
 
     cout << ht<< endl;

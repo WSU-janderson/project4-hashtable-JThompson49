@@ -17,7 +17,7 @@ enum class BucketType { NORMAL, ESS, EAR };
 class HashTableBucket {
 public:
     string key;
-    size_t value;
+    int value;
     BucketType type;
     /**
     * The default constructor can simply set the bucket type to ESS.

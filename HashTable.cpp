@@ -260,6 +260,63 @@ optional<int> HashTable::get(const string &key) const {
 * to access keys not in the table inside the bracket operator method.
 */
 int &HashTable::operator[](const string &key) {
+    size_t home = hash<string>{}(key) % capacity();
+
+    unsigned seed = key.length();
+    vector<size_t> probeOffsets;
+    for (size_t i = 1; i < capacity(); ++i) {
+        probeOffsets.push_back(i);
+    }
+    default_random_engine rng(seed);
+    shuffle(probeOffsets.begin(), probeOffsets.end(), rng);
+
+    size_t firstEAR = capacity();
+
+    for (size_t i = 0; i <= probeOffsets.size(); ++i) {
+        size_t index;
+        if (i == 0) {
+            index = home;
+        } else {
+            index = (home + probeOffsets[i - 1]) % capacity();
+        }
+
+        HashTableBucket &bucket = tableData[index];
+
+        if (bucket.type == BucketType::ESS) {
+            if (firstEAR != capacity()) {
+                tableData[firstEAR].load(key, 0);
+                ++currentSize;
+                if (deletedCount > 0) {
+                    --deletedCount;
+                }
+                return tableData[firstEAR].value;
+            } else {
+                bucket.load(key, 0);
+                ++currentSize;
+                return bucket.value;
+            }
+        } else {
+            if (bucket.type == BucketType::NORMAL) {
+                if (bucket.key == key) {
+                    return bucket.value;
+                }
+            } else {
+                if (firstEAR == capacity()) {
+                    firstEAR = index;
+                }
+            }
+        }
+    }
+
+    if (firstEAR != capacity()) {
+        tableData[firstEAR].load(key, 0);
+        ++currentSize;
+        if (deletedCount > 0) {
+            --deletedCount;
+        }
+        return tableData[firstEAR].value;
+    }
+
 }
 
 /**
@@ -268,6 +325,18 @@ int &HashTable::operator[](const string &key) {
 * the same as the size of the hash table.
 */
 vector<string> HashTable::keys() const {
+    vector<string> out;
+    out.reserve(currentSize);
+
+    for (size_t i = 0; i < tableData.size(); ++i) {
+        const HashTableBucket &bucket = tableData[i];
+        if (!bucket.isEmpty()) {
+            if (bucket.type == BucketType::NORMAL) {
+                out.push_back(bucket.key);
+            }
+        }
+    }
+    return out;
 }
 
 /**
